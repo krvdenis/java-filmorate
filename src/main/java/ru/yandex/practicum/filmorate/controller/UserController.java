@@ -27,20 +27,9 @@ public class UserController {
 
     @PostMapping
     public User create(@Valid @RequestBody User user) {
-
-//        if (user.getEmail() == null || !user.getEmail().contains("@")) {
-//            log.warn("Некорректный формат email: {}. Пользователь: {}", user.getEmail(), user);
-//            throw new ValidationException("Электронная почта должна содержать символ /'@/' ");
-//        }
-
-//        if (user.getLogin() == null || user.getLogin().matches(".*\\s.*")) {
-//            log.warn("Попытка регистрации с пустым логином. Пользователь: {}", user);
-//            throw new ValidationException("Логин не может быть пустым");
-//        }
         boolean isFutureBirthday = user.getBirthday() != null && user.getBirthday().isAfter(LocalDate.now());
         boolean isLoginAlreadyExists = users.values().stream()
                 .anyMatch(value -> value.getLogin().equals(user.getLogin()));
-
         boolean isEmailAlreadyExists = users.values().stream()
                 .anyMatch(value -> value.getEmail().equals(user.getEmail()));
 
@@ -85,22 +74,10 @@ public class UserController {
         boolean isFutureBirthday = newUser.getBirthday() != null && newUser.getBirthday().isAfter(LocalDate.now());
         boolean isLoginAlreadyExists = users.values().stream()
                 .anyMatch(value -> value.getLogin().equals(newUser.getLogin()));
-
         boolean isEmailAlreadyExists = users.values().stream()
                 .anyMatch(value -> value.getEmail().equals(newUser.getEmail()));
 
         if (users.containsKey(newUser.getId())) {
-
-//            if (newUser.getEmail() != null && !newUser.getEmail().contains("@")) {
-//                log.warn("Попытка изменить email на значение некорректного формата: {}. Пользователь: {}",
-//                        newUser.getEmail(), newUser);
-//                throw new ValidationException("Электронная почта должна содержать символ /'@/' ");
-//            }
-
-//            if (newUser.getLogin() != null && newUser.getLogin().isBlank()) {
-//                log.warn("Попытка изменить логин пользователя на пустое значение. Пользователь: {}", newUser);
-//                throw new ValidationException("Логин не может быть пустым");
-//            }
             User oldUser = users.get(newUser.getId());
 
             if (newUser.getLogin().matches(".*\\s.*")) {
@@ -127,7 +104,6 @@ public class UserController {
                 }
                 oldUser.setEmail(newUser.getEmail());
                 log.info("Пользователь под ID {} сменил email на: {}", newUser.getId(), newUser.getEmail());
-
             }
 
             if (newUser.getLogin() != null && !oldUser.getLogin().equals(newUser.getLogin())) {
@@ -138,7 +114,6 @@ public class UserController {
                 }
                 oldUser.setLogin(newUser.getLogin());
                 log.info("Пользователь под ID {} сменил логин на: {}", newUser.getId(), newUser.getLogin());
-
             }
 
             if (newUser.getBirthday() != null) {

@@ -8,6 +8,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.controller.FilmController;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -18,7 +19,17 @@ public class FilmControllerTest {
     private MockMvc mockMvc;
 
     @Test
-    void createUser_WithValidRequestBody_ShouldReturnOk() throws Exception {
+    void getFilms_ShouldReturnOk() throws Exception {
+        mockMvc.perform(get("/films")).andExpect(status().isOk());
+    }
+
+    @Test
+    void createFilm_WithOutRequestBody_ShouldReturnBadRequest() throws Exception {
+        mockMvc.perform(post("/films")).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void createFilm_WithValidRequestBody_ShouldReturnOk() throws Exception {
         String validFilmJson = "{" +
                 "  \"name\": \"XKJt2kJZt3OZ5di\"," +
                 "  \"description\": \"YU3lweQJsGINhjvwp5lJBOhp30RLD4KQS5UiCJDGSp5KDWpHo5\"," +
@@ -33,7 +44,7 @@ public class FilmControllerTest {
     }
 
     @Test
-    void createUser_WithBlankName_ShouldReturnBadRequest() throws Exception {
+    void createFilm_WithBlankName_ShouldReturnBadRequest() throws Exception {
         String filmJsonWithBlankName = "{" +
                 "  \"name\": \"\"," +
                 "  \"description\": \"YU3lweQJsGINhjvwp5lJBOhp30RLD4KQS5UiCJDGSp5KDWpHo5\"," +
@@ -48,7 +59,7 @@ public class FilmControllerTest {
     }
 
     @Test
-    void createUser_WithNullName_ShouldReturnBadRequest() throws Exception {
+    void createFilm_WithNullName_ShouldReturnBadRequest() throws Exception {
         String filmJsonWithNullName = "{" +
                 "  \"description\": \"YU3lweQJsGINhjvwp5lJBOhp30RLD4KQS5UiCJDGSp5KDWpHo5\"," +
                 "  \"releaseDate\": \"1964-03-21\"," +
@@ -62,10 +73,10 @@ public class FilmControllerTest {
     }
 
     @Test
-    void createUser_WithDescription200Chars_ShouldReturnBadRequest() throws Exception {
-        String filmJsonDescriptionWith200Chars = "YU3lweQJsGINhjvwp5lJBOhp30RLD4KQS5UiCJDGSp5KDWpHo5safsdgdvjkdsg35fdljfaflj3r" +
-                "lkasffladlfjlvjzxvljaskfjlYU3lweQJsGINhjvwp5lJBOhp30RLD4KQS5UiCJDGSp5KDWpHo5safsdgdvjkdsgasd34rfafa" +
-                "sasddasdasdsadasdasd12das";
+    void createFilm_WithDescription200Chars_ShouldReturnOk() throws Exception {
+        String filmJsonDescriptionWith200Chars = "YU3lweQJsGINhjvwp5lJBOhp30RLD4KQS5UiCJDGSp5KDWpHo5safsdgdvjkdsg3" +
+                "5fdljfaflj3rlkasffladlfjlvjzxvljaskfjlYU3lweQJsGINhjvwp5lJBOhp30RLD4KQS5UiCJDGSp5KDWpHo5safsdgdvjk" +
+                "dsgasd34rfafasasddasdasdsadasdasd12das";
 
         String filmJsonWithDescription200Chars = "{" +
                 "  \"name\": \"XKJt2kJZt3OZ5di\"," +
@@ -81,10 +92,10 @@ public class FilmControllerTest {
     }
 
     @Test
-    void createUser_WithDescriptionOver200Chars_ShouldReturnBadRequest() throws Exception {
-        String filmJsonDescriptionWith201Chars = "YU3lweQJsGINhjvwp5lJBOhp30RLD4KQS5UiCJDGSp5KDWpHo5safsdgdvjkdsg35fdljfaflj3r" +
-                "lkasffladlfjlvjzxvljaskfjlYU3lweQJsGINhjvwp5lJBOhp30RLD4KQS5UiCJDGSp5KDWpHo5safsdgdvjkdsgasd34rfafa" +
-                "sasddasdasdsadasdasd12das1";
+    void createFilm_WithDescriptionOver200Chars_ShouldReturnBadRequest() throws Exception {
+        String filmJsonDescriptionWith201Chars = "YU3lweQJsGINhjvwp5lJBOhp30RLD4KQS5UiCJDGSp5KDWpHo5safsdgdvjkdsg35" +
+                "fdljfaflj3rlkasffladlfjlvjzxvljaskfjlYU3lweQJsGINhjvwp5lJBOhp30RLD4KQS5UiCJDGSp5KDWpHo5safsdgdvjkdsg" +
+                "asd34rfafasasddasdasdsadasdasd12das1";
         String filmJsonWithDescriptionOver200Chars = "{" +
                 "  \"name\": \"XKJt2kJZt3OZ5di\"," +
                 "  \"description\": \"" + filmJsonDescriptionWith201Chars + "\"," +
@@ -99,7 +110,7 @@ public class FilmControllerTest {
     }
 
     @Test
-    void createUser_WithMinimumAcceptableReleaseDate_ShouldReturnOk() throws Exception {
+    void createFilm_WithMinimumAcceptableReleaseDate_ShouldReturnOk() throws Exception {
         String validFilmJson = "{" +
                 "  \"name\": \"XKJt2kJZt3OZ5di\"," +
                 "  \"description\": \"YU3lweQJsGINhjvwp5lJBOhp30RLD4KQS5UiCJDGSp5KDWpHo5\"," +
@@ -114,7 +125,7 @@ public class FilmControllerTest {
     }
 
     @Test
-    void createUser_WithBeforeMinimumAcceptableReleaseDate_ShouldReturnOk() throws Exception {
+    void createFilm_WithBeforeMinimumAcceptableReleaseDate_ShouldReturnBadRequest() throws Exception {
         String validFilmJson = "{" +
                 "  \"name\": \"XKJt2kJZt3OZ5di\"," +
                 "  \"description\": \"YU3lweQJsGINhjvwp5lJBOhp30RLD4KQS5UiCJDGSp5KDWpHo5\"," +
@@ -131,7 +142,7 @@ public class FilmControllerTest {
     }
 
     @Test
-    void createFilm_WithOneDuration_ShouldReturnBadRequest() throws Exception {
+    void createFilm_WithOneDuration_ShouldReturnOk() throws Exception {
         String filmJsonWithOneDuration = "{" +
                 "  \"name\": \"XKJt2kJZt3OZ5di\"," +
                 "  \"description\": \"YU3lweQJsGINhjvwp5lJBOhp30RLD4KQS5UiCJDGSp5KDWpHo5\"," +

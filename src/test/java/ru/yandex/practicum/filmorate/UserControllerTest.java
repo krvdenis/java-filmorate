@@ -7,6 +7,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.controller.UserController;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -17,6 +18,16 @@ public class UserControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Test
+    void getUsers_ShouldReturnOk() throws Exception {
+        mockMvc.perform(get("/users")).andExpect(status().isOk());
+    }
+
+    @Test
+    void createUser_WithOutRequestBody_ShouldReturnBadRequest() throws Exception {
+        mockMvc.perform(post("/users")).andExpect(status().isBadRequest());
+    }
 
     @Test
     void createUser_WithValidRequestBody_ShouldReturnOk() throws Exception {
