@@ -9,7 +9,6 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -27,21 +26,10 @@ public class UserController {
 
     @PostMapping
     public User create(@Valid @RequestBody User user) {
-        boolean isFutureBirthday = user.getBirthday() != null && user.getBirthday().isAfter(LocalDate.now());
         boolean isLoginAlreadyExists = users.values().stream()
                 .anyMatch(value -> value.getLogin().equals(user.getLogin()));
         boolean isEmailAlreadyExists = users.values().stream()
                 .anyMatch(value -> value.getEmail().equals(user.getEmail()));
-
-        if (user.getLogin().matches(".*\\s.*")) {
-            log.warn("Попытка регистрации, используя пробел в логине. Пользователь: {}", user);
-            throw new ValidationException("В логине не должно быть пробелов");
-        }
-
-        if (isFutureBirthday) {
-            log.warn("Указана дата рождения в будущем: {}. Пользователь: {}", user.getBirthday(), user);
-            throw new ValidationException("Дата рождения не может быть в будущем");
-        }
 
         if (isLoginAlreadyExists) {
             log.warn("Попытка регистрации с уже используемым логином: {}. Пользователь: {}", user.getLogin(), user);
@@ -71,7 +59,6 @@ public class UserController {
             throw new ValidationException("Id должен быть указан");
         }
 
-        boolean isFutureBirthday = newUser.getBirthday() != null && newUser.getBirthday().isAfter(LocalDate.now());
         boolean isLoginAlreadyExists = users.values().stream()
                 .anyMatch(value -> value.getLogin().equals(newUser.getLogin()));
         boolean isEmailAlreadyExists = users.values().stream()
@@ -79,17 +66,6 @@ public class UserController {
 
         if (users.containsKey(newUser.getId())) {
             User oldUser = users.get(newUser.getId());
-
-            if (newUser.getLogin().matches(".*\\s.*")) {
-                log.warn("Попытка изменить логин пользователя на значение c пробелом. Пользователь: {}", newUser);
-                throw new ValidationException("Логин не может содержать пробел");
-            }
-
-            if (isFutureBirthday) {
-                log.warn("Попытка изменить дату рождения на значение в будущем: {}. Пользователь: {}",
-                        newUser.getBirthday(), newUser);
-                throw new ValidationException("Дата рождения не может быть в будущем");
-            }
 
             if (newUser.getName() != null) {
                 oldUser.setName(newUser.getName());

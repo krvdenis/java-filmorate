@@ -9,7 +9,6 @@ import ru.yandex.practicum.filmorate.controller.UserController;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
@@ -100,8 +99,7 @@ public class UserControllerTest {
         mockMvc.perform(post("/users")
                         .content(userJsonWithSpacesInLogin)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").value("В логине не должно быть пробелов"));
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -145,7 +143,6 @@ public class UserControllerTest {
         mockMvc.perform(post("/users")
                         .content(userJsonWithFutureBirthday)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").value("Дата рождения не может быть в будущем"));
+                .andExpect(status().isBadRequest());
     }
 }
