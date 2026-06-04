@@ -1,12 +1,26 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.validation.constraints.*;
+import lombok.Data;
+import ru.yandex.practicum.filmorate.annotations.NotBefore1895Dec28;
+
+import java.time.LocalDate;
 
 /**
  * Film.
  */
-@Getter
-@Setter
+@Data
 public class Film {
+
+    private Long id;
+    @NotBlank
+    private String name;
+
+    @Size(max = 200)
+    private String description;
+    @NotBefore1895Dec28(message = "Дата должна быть после 28 декабря 1895 года")
+    private LocalDate releaseDate;
+
+    @Positive
+    private int duration;
 }
