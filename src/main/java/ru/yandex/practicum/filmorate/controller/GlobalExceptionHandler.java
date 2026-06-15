@@ -21,13 +21,13 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(DuplicatedDataException.class)
-    public ResponseEntity<ErrorResponse> handleValidationException(DuplicatedDataException ex) {
+    public ResponseEntity<ErrorResponse> handleDuplicatedDataException(DuplicatedDataException ex) {
         ErrorResponse errorResponse = new ErrorResponse(ex.getMessage());
         return ResponseEntity.badRequest().body(errorResponse);
     }
 
     @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleValidationException(NotFoundException ex) {
+    public ResponseEntity<ErrorResponse> handleNotFoundException(NotFoundException ex) {
         ErrorResponse errorResponse = new ErrorResponse(ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
