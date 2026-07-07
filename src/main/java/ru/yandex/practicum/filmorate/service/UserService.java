@@ -152,5 +152,4 @@ public class UserService {
     private User getUser(Long id) {
         return inMemoryUserStorage.getUsers().get(id);
     }
-    
 }
