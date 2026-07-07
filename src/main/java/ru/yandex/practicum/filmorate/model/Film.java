@@ -17,19 +17,23 @@ import java.util.Set;
 public class Film {
     private Long id;
     @NotBlank
-    private String name;
+    private String title;
 
-    @Size(max = 200)
-    private String description;
+    private Set<Genre> genres = new HashSet<>();
+    private Long mpaRatingId;
 
     @NotBefore1895Dec28(message = "Дата должна быть после 28 декабря 1895 года")
     private LocalDate releaseDate;
 
+    @Size(max = 200)
+    private String description;
+
     @Positive
     private int duration;
-    private Set<Long> likes = new HashSet<>();
 
-    public int getTotalLikes() {
+    private Set<Long> likes = new HashSet<>(); // нужно будет убрать
+
+    public int getTotalLikes() { //нужно будет заменить из-за того, что убираю likes
         return likes.size();
     }
 

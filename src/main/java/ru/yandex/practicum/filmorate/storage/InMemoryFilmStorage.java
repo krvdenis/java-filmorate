@@ -32,7 +32,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         }
         film.setId(getNextId());
         films.put(film.getId(), film);
-        log.info("Пользователь добавил фильм с названием {} с ID {}", film.getName(), film.getId());
+        log.info("Пользователь добавил фильм с названием {} с ID {}", film.getTitle(), film.getId());
         return film;
     }
 
@@ -46,9 +46,9 @@ public class InMemoryFilmStorage implements FilmStorage {
         if (films.containsKey(newFilm.getId())) {
             Film oldFilm = films.get(newFilm.getId());
 
-            if (newFilm.getName() != null && !oldFilm.getName().equals(newFilm.getName())) {
-                oldFilm.setName(newFilm.getName());
-                log.info("Пользователь изменил имя фильма с ID {} на {}", newFilm.getId(), newFilm.getName());
+            if (newFilm.getTitle() != null && !oldFilm.getTitle().equals(newFilm.getTitle())) {
+                oldFilm.setTitle(newFilm.getTitle());
+                log.info("Пользователь изменил имя фильма с ID {} на {}", newFilm.getId(), newFilm.getTitle());
 
             }
             if (newFilm.getDescription() != null && !oldFilm.getDescription().equals(newFilm.getDescription())) {

@@ -16,10 +16,6 @@ import java.util.Set;
 @Data
 public class User {
     private Long id;
-    @Email
-    @NotBlank
-    private String email;
-
     @NotBlank
     @Pattern(
             regexp = "^[a-zA-Zа-яА-я0-9_@.-]{4,16}$",
@@ -27,7 +23,12 @@ public class User {
     )
     private String login;
     private String name;
+    @Email
+    @NotBlank
+    private String email;
+
     @PastOrPresent
     private LocalDate birthday;
+
     private final Set<Long> friends = new HashSet<>();
 }

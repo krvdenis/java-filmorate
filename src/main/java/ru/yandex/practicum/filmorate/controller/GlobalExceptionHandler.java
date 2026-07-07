@@ -44,7 +44,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Throwable.class)
-    public ResponseEntity<ErrorResponse> handleValidationException(Throwable ex) {
+    public ResponseEntity<ErrorResponse> handleValidationException(Exception ex) {
         ErrorResponse errorResponse = new ErrorResponse("Произошла непредвиденная ошибка");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }

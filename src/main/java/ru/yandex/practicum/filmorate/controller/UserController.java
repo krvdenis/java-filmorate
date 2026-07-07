@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
@@ -24,6 +25,7 @@ public class UserController {
     }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public User create(@Valid @RequestBody User user) {
         log.info("Поступил запрос на создание пользователя: {}", user);
         return userService.createUser(user);
@@ -49,6 +51,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteFriend(@PathVariable("id") Long userId, @PathVariable Long friendId) {
         log.info("Поступил запрос на удаление из списка друзей пользователя с ID {} пользователя с ID: {}", userId,
                 friendId);

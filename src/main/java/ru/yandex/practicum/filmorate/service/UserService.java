@@ -26,7 +26,7 @@ public class UserService {
             throw new ValidationException("ID пользователей должен быть указан!");
         }
         if (!inMemoryUserStorage.getUsers().containsKey(newFriendId)) {
-            log.warn("Пользователь с ID {} не существует", newFriendId);
+            log.warn("Пользователь, которого необходимо добавить в друзья, с ID {} не существует", newFriendId);
             throw new NotFoundException("Пользователь с ID " + newFriendId + " не существует!");
         }
         if (!inMemoryUserStorage.getUsers().containsKey(userId)) {
@@ -42,7 +42,7 @@ public class UserService {
         Set<Long> userFriends = user.getFriends();
         userFriends.add(newFriendId);
         User newFriend = getUser(newFriendId);
-        newFriend.getFriends().add(userId);
+//        newFriend.getFriends().add(userId); реализация односторонней дружбы
         log.info("Пользователь с ID={} добавлен в список друзей пользователя с ID={}", newFriend, userId);
         return user;
     }
@@ -58,7 +58,7 @@ public class UserService {
             throw new NotFoundException("Пользователь с ID " + userId + " не существует!");
         }
         if (!inMemoryUserStorage.getUsers().containsKey(friendId)) {
-            log.warn("Пользователь с ID {} не существует", friendId);
+            log.warn("Пользователь, которого необходимо удалить из друзей, с ID {} не существует", friendId);
             throw new NotFoundException("Пользователь с ID " + friendId + " не существует!");
         }
         if (userId.equals(friendId)) {
@@ -86,7 +86,7 @@ public class UserService {
             throw new NotFoundException("Пользователь с ID " + userId + " не существует!");
         }
         if (!inMemoryUserStorage.getUsers().containsKey(otherId)) {
-            log.warn("Пользователь с ID {} не существует", otherId);
+            log.warn("Пользователь, с которым нужно найти общих друзей, с ID {} не существует", otherId);
             throw new NotFoundException("Пользователь с ID " + otherId + " не существует!");
         }
 
@@ -142,7 +142,7 @@ public class UserService {
             throw new ValidationException("ID пользователей должен быть указан!");
         }
         if (!inMemoryUserStorage.getUsers().containsKey(userId)) {
-            log.warn("Пользователь с ID {} не существует", userId);
+            log.warn("Запрашиваемый пользователь с ID {} не существует", userId);
             throw new NotFoundException("Пользователь с ID " + userId + " не существует!");
         }
         log.info("Отправлена информация о пользователе: {}", getUser(userId));
@@ -152,4 +152,5 @@ public class UserService {
     private User getUser(Long id) {
         return inMemoryUserStorage.getUsers().get(id);
     }
+    
 }
