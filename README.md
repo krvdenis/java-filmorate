@@ -80,7 +80,7 @@ INSERT INTO user (login, name, email, birthday) VALUES (?, ?, ?, ?);
 UPDATE user SET login = ?, email = ? WHERE user_id = ?;
 ```
 
-### 5. Работа с дружбами
+### 5. Работа с дружбой
 #### Добавить пользователя в друзья
 
 ```sql
