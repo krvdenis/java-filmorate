@@ -1,6 +1,6 @@
 # java-filmorate
 Template repository for Filmorate project.
-![Screenshot](https://github.com/krvdenis/java-filmorate/blob/add-database/ER-filmorate.png)
+
 
 # SQL‑запросы для работы с базой данных
 
@@ -31,7 +31,7 @@ VALUES (?, ?, ?, ?, ?);
 #### Обновить данные фильма
 
 ```sql
-UPDATE film SET title = ? WHERE film_id = ?;
+UPDATE film SET title = ? WHERE id = ?;
 ```
 
 #### Получить топ‑N популярных фильмов (по количеству лайков)
@@ -96,7 +96,7 @@ INSERT INTO user (login, name, email, birthday) VALUES (?, ?, ?, ?);
 #### Обновить данные пользователя
 
 ```sql
-UPDATE user SET login = ?, email = ? WHERE user_id = ?;
+UPDATE user SET login = ?, email = ? WHERE id = ?;
 ```
 
 ### 5. Работа с дружбой
