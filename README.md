@@ -39,7 +39,7 @@ UPDATE film SET title = ? WHERE id = ?;
 ```sql
 SELECT f.title
 FROM film AS f
-JOIN film_like AS fl ON f.id = fl.film_id
+LEFT JOIN film_like AS fl ON f.id = fl.film_id
 GROUP BY f.id, f.title
 ORDER BY COUNT(fl.user_id) DESC
 LIMIT ?;
@@ -108,6 +108,7 @@ INSERT INTO user_friend (user_id, friend_user_id) VALUES (?, ?);
  ```
 #### Получить всех друзей пользователя
 *По умолчанию возвращает только тех, кого пользователь добавил в друзья. (односторонняя дружба)*
+*Одна запись в user_friend — односторонняя дружба, две встречные записи — подтверждённая дружба*
 
 ```sql
 SELECT friend_user_id FROM user_friend WHERE user_id = ?;
