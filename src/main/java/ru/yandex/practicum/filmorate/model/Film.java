@@ -17,7 +17,7 @@ import java.util.Set;
 public class Film {
     private Long id;
     @NotBlank
-    private String title;
+    private String name;
 
     private Set<Genre> genres = new HashSet<>();
     private Long mpaRatingId;
@@ -35,6 +35,6 @@ public class Film {
 
     public int getTotalLikes() { //нужно будет заменить из-за того, что убираю likes
         return likes.size();
-    }
+    } // ни к село ни к городу
 
 }

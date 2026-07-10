@@ -1,26 +1,80 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dal.storage.GenreDbStorage;
+import ru.yandex.practicum.filmorate.dal.storage.MpaRatingDbStorage;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.dal.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.dal.storage.UserStorage;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.MpaRating;
+import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
 public class FilmService {
-    private final FilmStorage inMemoryFilmStorage;
-    private final UserStorage inMemoryUserStorage;
-    private final Comparator<Film> filmComparator = Comparator.comparing(Film::getTotalLikes).reversed();
+    private final FilmStorage filmStorage;
+    private final UserStorage userStorage;
+    private final GenreDbStorage genreStorage;
+    private final MpaRatingDbStorage mpaRatingStorage;
+
+    public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage,
+                       @Qualifier("userDbStorage") UserStorage userStorage,
+                       GenreDbStorage genreStorage,
+                       MpaRatingDbStorage mpaRatingStorage) {
+        this.filmStorage = filmStorage;
+        this.userStorage = userStorage;
+        this.genreStorage = genreStorage;
+        this.mpaRatingStorage = mpaRatingStorage;
+    }
+
+    public Film createFilm(Film film) {
+        if (film == null) {
+            log.warn("Попытка добавить фильм без данных");
+            throw new ValidationException("Невозможно добавить фильм без данных");
+        }
+        log.debug("Попытка добавить новый фильм: {}", film);
+        log.info("Пользователь добавил фильм с названием {} с ID {}", film.getName(), film.getId());
+        return filmStorage.createFilm(film);
+    }
+
+    public Film updateFilm(Film newFilm) {
+        if (newFilm.getId() == null) {
+            log.warn("Отсутствует ID у объекта. Данные: {}", newFilm);
+            throw new ValidationException("Id должен быть указан");
+        }
+        log.debug("Попытка внести изменения в данные фильма: {}", newFilm);
+        return filmStorage.updateFilm(newFilm);
+    }
+
+    public Collection<Film> getAllFilms() {
+        log.debug("Попытка получить список всех фильмов");
+        Collection<Film> films = filmStorage.findAllFilms();
+        log.info("Возвращается список из {} фильмов", films.size());
+        return films;
+    }
+
+    public Film findFilmById(Long filmId) {
+        log.debug("Попытка найти фильм: filmId={}", filmId);
+        if (filmId == null) {
+            log.warn("Попытка найти фильм без указания ID фильма");
+            throw new ValidationException("ID фильма должен быть указан!");
+        }
+
+        Optional<Film> filmOptional = filmStorage.findFilmById(filmId);
+        if (filmOptional.isEmpty()) {
+            log.warn("Фильм с ID {} не найден", filmId);
+            throw new NotFoundException("Фильм c ID " + filmId + " не найден!");
+        }
+        log.info("Пользователю отправлена информация о фильме: {}", filmOptional.get());
+        return filmOptional.get();
+    }
 
     public Film addLike(Long userId, Long filmId) {
         log.debug("Попытка добавить like: userId={}, filmId={}", userId, filmId);
@@ -32,19 +86,17 @@ public class FilmService {
             log.warn("Попытка добавить like без указания ID фильма");
             throw new ValidationException("ID фильма должен быть указан!");
         }
-        if (!inMemoryUserStorage.getUsers().containsKey(userId)) {
-            log.warn("Пользователь с ID {} не существует", userId);
-            throw new NotFoundException("Пользователь c ID " + userId + " не существует!");
+        Optional<User> userOptional = userStorage.findUserById(userId);
+        if (userOptional.isEmpty()) {
+            log.warn("Пользователь с ID {} не найден", userId);
+            throw new NotFoundException("Пользователь c ID " + userId + " не найден!");
         }
-        if (!inMemoryFilmStorage.getFilms().containsKey(filmId)) {
-            log.warn("Фильм с ID {} не существует", filmId);
-            throw new NotFoundException("Фильм c ID " + filmId + " не существует!");
+        Optional<Film> filmOptional = filmStorage.findFilmById(userId);
+        if (filmOptional.isEmpty()) {
+            log.warn("Фильм с ID {} не найден", filmId);
+            throw new NotFoundException("Фильм c ID " + filmId + " не найден!");
         }
-
-        Film film = getFilm(filmId);
-        Set<Long> likes = film.getLikes();
-        likes.add(userId);
-
+        Film film = filmStorage.addLike(filmOptional.get(), userId);
         log.info("Лайк добавлен: пользователь {} поставил like фильму {}", userId, filmId);
         return film;
     }
@@ -59,66 +111,65 @@ public class FilmService {
             log.warn("Попытка удалить like без указания ID фильма");
             throw new ValidationException("ID фильма должен быть указан!");
         }
-        if (!inMemoryUserStorage.getUsers().containsKey(userId)) {
-            log.warn("Пользователь с ID {} не существует", userId);
-            throw new NotFoundException("Пользователь c ID " + userId + " не существует!");
+        Optional<User> userOptional = userStorage.findUserById(userId);
+        if (userOptional.isEmpty()) {
+            log.warn("Пользователь с ID {} не найден", userId);
+            throw new NotFoundException("Пользователь c ID " + userId + " не найден!");
         }
-        if (!inMemoryFilmStorage.getFilms().containsKey(filmId)) {
-            log.warn("Фильм с ID {} не существует", filmId);
-            throw new NotFoundException("Фильм c ID " + filmId + " не существует!");
+        Optional<Film> filmOptional = filmStorage.findFilmById(userId);
+        if (filmOptional.isEmpty()) {
+            log.warn("Фильм с ID {} не найден", filmId);
+            throw new NotFoundException("Фильм c ID " + filmId + " не найден!");
         }
 
-        Set<Long> likes = getFilm(filmId).getLikes();
-        boolean removed = likes.remove(userId);
-
-        if (removed) {
-            log.info("Лайк удалён: пользователь {} убрал лайк у фильма {}", userId, filmId);
-        } else {
-            log.warn("Попытка удалить отсутствующий лайк: пользователь {} не ставил лайк фильму {}", userId, filmId);
-        }
+        filmStorage.deleteLike(filmOptional.get(), userId);
     }
 
-    public List<Film> getCountMostPopularFilmsByLikes(int count) {
+    public Collection<Film> getCountMostPopularFilmsByLikes(int count) {
         log.debug("Запрос популярных фильмов: count={}", count);
 
-        List<Film> popularFilms = inMemoryFilmStorage.getFilms().values()
-                .stream()
-                .sorted(filmComparator)
-                .limit(count)
-                .toList();
+        Collection<Film> popularFilms = filmStorage.findMostPopularFilmsByLikes(count);
 
         log.info("Найдено популярных фильмов: {}", popularFilms.size());
         return popularFilms;
     }
 
-    public Collection<Film> getAllFilms() {
-        return inMemoryFilmStorage.findAll();
+    public Genre createGenre(String name) {
+        return genreStorage.create(name);
     }
-
-    public Film createFilm(Film film) {
-        return inMemoryFilmStorage.create(film);
+    
+    public Collection<Genre> findAllGenre() {
+        return genreStorage.findAll();
     }
-
-    public Film updateFilm(Film newFilm) {
-        return inMemoryFilmStorage.update(newFilm);
-    }
-
-    public Film findFilmById(Long filmId) {
-        log.debug("Попытка найти фильм: filmId={}", filmId);
-        if (filmId == null) {
-            log.warn("Попытка найти фильм без указания ID фильма");
-            throw new ValidationException("ID фильма должен быть указан!");
+    
+    public Genre findGenreById(Long genreId) {
+        if (genreId == null) {
+            log.warn("Попытка найти жанр без указания ID жанра");
+            throw new ValidationException("ID жанра должен быть указан!");
         }
-        if (!inMemoryFilmStorage.getFilms().containsKey(filmId)) {
-            log.warn("Фильм с ID {} не существует", filmId);
-            throw new NotFoundException("Фильм c ID " + filmId + " не существует!");
+        
+        Optional<Genre> genreOptional = genreStorage.findById(genreId);
+        if (genreOptional.isEmpty()) {
+            throw new NotFoundException("Жанр c ID " + genreId + " не найден!");
+        }
+        return genreOptional.get();
+    }
+
+    public Collection<MpaRating> findAllMpaRatings() {
+        return mpaRatingStorage.findAll();
+    }
+
+    public MpaRating findMpaRatingById(Long mpaRatingId) {
+        if (mpaRatingId == null) {
+            log.warn("Попытка найти MPA рейтинг без указания ID MPA рейтинга");
+            throw new ValidationException("ID MPA рейтинга должен быть указан!");
         }
 
-        log.info("Пользователю отправлена информация о фильме: {}", getFilm(filmId));
-        return getFilm(filmId);
+        Optional<MpaRating> mpaRatingOptional = mpaRatingStorage.findById(mpaRatingId);
+        if (mpaRatingOptional.isEmpty()) {
+            throw new NotFoundException("Жанр c ID " + mpaRatingId + " не найден!");
+        }
+        return mpaRatingOptional.get();
     }
-
-    private Film getFilm(Long id) {
-        return inMemoryFilmStorage.getFilms().get(id);
-    }
+    
 }

@@ -1,10 +1,13 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.MpaRating;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.util.Collection;
@@ -54,7 +57,7 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public List<Film> getCountPopularFilms(@RequestParam Integer count) {
+    public Collection<Film> getCountPopularFilms(@RequestParam Integer count) {
         log.info("Поступил запрос на список из {} самых популярных фильмов", count);
         if (count == null) {
             return filmService.getCountMostPopularFilmsByLikes(10);
@@ -62,5 +65,24 @@ public class FilmController {
             return filmService.getCountMostPopularFilmsByLikes(count);
         }
     }
+
+    @GetMapping("/genres")
+    public Collection<Genre> findAllGenres() {
+        return filmService.findAllGenre();
+    }
+
+    @GetMapping("/genres/{id}")
+    public Genre findGenreById(@PathVariable Long id) {
+        return filmService.findGenreById(id);
+    }
+    @GetMapping("/mpa")
+    public Collection<MpaRating> findMpaRatings() {
+        return filmService.findAllMpaRatings();
+    }
+    @GetMapping("/mpa/{id}")
+    public MpaRating findMpaRatingById(@PathVariable Long id) {
+        return filmService.findMpaRatingById(id);
+    }
+
 
 }

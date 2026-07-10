@@ -1,4 +1,5 @@
 # java-filmorate
+
 Template repository for Filmorate project.
 ![Screenshot](https://github.com/krvdenis/java-filmorate/blob/add-database/ER-filmorate.png)
 
@@ -12,7 +13,7 @@ Template repository for Filmorate project.
 SELECT *
 FROM film;
 ```
- 
+
 #### Найти фильм по ID
 
 ```sql
@@ -78,25 +79,25 @@ DELETE FROM film_like WHERE film_id = ? AND user_id = ?;
 #### Получить список всех пользователей
 
 ```sql
-SELECT * FROM user;
+SELECT * FROM \"user\";
  ```
 
 #### Найти пользователя по ID
 
 ```sql
-SELECT * FROM user WHERE id = ?;
+SELECT * FROM \"user\" WHERE id = ?;
  ```
 
 #### Добавить нового пользователя
 
 ```sql
-INSERT INTO user (login, name, email, birthday) VALUES (?, ?, ?, ?);
+INSERT INTO \"user\" (login, name, email, birthday) VALUES (?, ?, ?, ?);
  ```
 
 #### Обновить данные пользователя
 
 ```sql
-UPDATE user SET login = ?, email = ? WHERE id = ?;
+UPDATE \"user\" SET login = ?, name = ?, SET email = ?, SET birthday = ? WHERE id = ?
 ```
 
 ### 5. Работа с дружбой
@@ -106,12 +107,17 @@ UPDATE user SET login = ?, email = ? WHERE id = ?;
 ```sql
 INSERT INTO user_friend (user_id, friend_user_id) VALUES (?, ?);
  ```
-#### Получить всех друзей пользователя
+
+#### Получить список всех друзей пользователя
+
 *По умолчанию возвращает только тех, кого пользователь добавил в друзья. (односторонняя дружба)*
 *Одна запись в user_friend — односторонняя дружба, две встречные записи — подтверждённая дружба*
 
 ```sql
-SELECT friend_user_id FROM user_friend WHERE user_id = ?;
+SELECT u.*
+FROM \"user\" AS u
+JOIN user_friend AS ON u.id = uf.friend_user_id
+WHERE uf.user_id = ?;
 ```
 
 #### Удалить пользователя из друзей
@@ -120,20 +126,22 @@ SELECT friend_user_id FROM user_friend WHERE user_id = ?;
 DELETE FROM user_friend
 WHERE user_id = ? AND friend_user_id = ?;
 ```
+
 ### 6. Поиск общих друзей
 
 Вариант 1: через JOIN
 
 ```sql
-SELECT DISTINCT uf1.friend_user_id AS common_friend_id
-FROM user_friend AS uf1
-JOIN user_friend AS uf2 ON uf1.friend_user_id = uf2.friend_user_id
-WHERE uf1.user_id = ? AND uf2.user_id = ?;
-```
-Вариант 2: через INTERSECT
-
-```sql
-(SELECT friend_user_id FROM user_friend WHERE user_id = ?)
-INTERSECT
-(SELECT friend_user_id FROM user_friend WHERE user_id = ?);
+SELECT u.*
+FROM "user" u
+WHERE u.id IN (
+    SELECT uf1.friend_user_id
+    FROM user_friend uf1
+    WHERE uf1.user_id = ?
+)
+AND u.id IN (
+    SELECT uf2.friend_user_id
+    FROM user_friend uf2
+    WHERE uf2.user_id = ?
+);
 ```

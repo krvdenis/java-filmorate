@@ -1,0 +1,27 @@
+package ru.yandex.practicum.filmorate.dal.storage;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.model.MpaRating;
+
+import java.util.Collection;
+import java.util.Optional;
+
+@Component
+public class MpaRatingDbStorage extends BaseDbStorage<MpaRating> {
+    private static final String FIND_ALL_MPA_RATINGS_QUERY = "SELECT * FROM mpa_rating";
+    private static final String FIND_MPA_RATING_BY_ID_QUERY = "SELECT * FROM mpa_rating WHERE mpa_rating_id = ?";
+
+    public MpaRatingDbStorage(JdbcTemplate jdbc, RowMapper<MpaRating> mapper) {
+        super(jdbc, mapper);
+    }
+
+    public Collection<MpaRating> findAll() {
+        return findMany(FIND_ALL_MPA_RATINGS_QUERY);
+    }
+
+    public Optional<MpaRating> findById(Long genreId) {
+        return findOne(FIND_MPA_RATING_BY_ID_QUERY, genreId);
+    }
+}
