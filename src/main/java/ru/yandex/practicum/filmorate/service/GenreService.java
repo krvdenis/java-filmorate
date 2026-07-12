@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -32,5 +33,10 @@ public class GenreService {
             throw new NotFoundException("Жанр c ID " + id + " не найден!");
         }
         return genreOptional.get();
+    }
+    //добавить сюда count mpa и заменить дальше на этот метод
+
+    public Collection<Genre> findGenresByFilmId(Long filmId) {
+        return genreDbStorage.findGenresByFilmId(filmId);
     }
 }

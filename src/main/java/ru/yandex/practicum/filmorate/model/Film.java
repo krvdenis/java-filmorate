@@ -16,17 +16,18 @@ import java.util.Set;
 @Data
 public class Film {
     private Long id;
+
     @NotBlank
     private String name;
-
-    private Set<Genre> genres = new HashSet<>();
-    private MpaRating mpa;
 
     @NotBefore1895Dec28(message = "Дата должна быть после 28 декабря 1895 года")
     private LocalDate releaseDate;
 
     @Size(max = 200)
     private String description;
+
+    private MpaRating mpa; // кажется, лучше добавить Long вместо MpaRating
+    private Set<Genre> genres = new HashSet<>(); // кажется, лучше добавить Long вместо Genre
 
     @Positive
     private int duration;

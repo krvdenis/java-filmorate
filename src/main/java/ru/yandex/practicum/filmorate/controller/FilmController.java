@@ -1,17 +1,13 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.MpaRating;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.util.Collection;
-import java.util.List;
 
 @RestController
 @Slf4j
@@ -41,7 +37,7 @@ public class FilmController {
     @GetMapping("/{id}")
     public Film findFilmById(@PathVariable Long id) {
         log.info("Поступил запрос на поиск фильма с ID: {}", id);
-        return filmService.findFilmById(id);
+        return filmService.findFilmWithGenresAndMpaById(id);
     }
 
     @PutMapping("/{id}/like/{userId}")
@@ -66,15 +62,15 @@ public class FilmController {
         }
     }
 
-    @GetMapping("/genres")
-    public Collection<Genre> findAllGenres() {
-        return filmService.findAllGenre();
-    }
-
-    @GetMapping("/genres/{id}")
-    public Genre findGenreById(@PathVariable Long id) {
-        return filmService.findGenreById(id);
-    }
+//    @GetMapping("/genres")
+//    public Collection<Genre> findAllGenres() {
+//        return filmService.findAllGenre();
+//    }
+//
+//    @GetMapping("/genres/{id}")
+//    public Genre findGenreById(@PathVariable Long id) {
+//        return filmService.findGenreById(id);
+//    }
 
 
 

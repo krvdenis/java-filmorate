@@ -29,11 +29,14 @@ public class MpaService {
 
             Optional<MpaRating> mpaRatingOptional = mpaStorage.findById(id);
             if (mpaRatingOptional.isEmpty()) {
-                throw new NotFoundException("Жанр c ID " + id + " не найден!");
+                throw new NotFoundException("MPA c ID " + id + " не найден!");
             }
             return mpaRatingOptional.get();
 
     }
 
+    public MpaRating findMpaRatingByFilmId(Long filmId) {
+       return mpaStorage.findMpaByFilmId(filmId).orElse(null);
+    }
     //добавить сюда count mpa и заменить дальше на этот метод
 }

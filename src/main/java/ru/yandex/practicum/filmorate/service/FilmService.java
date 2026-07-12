@@ -20,18 +20,24 @@ import java.util.*;
 @Slf4j
 public class FilmService {
     private final FilmStorage filmStorage;
-    private final UserStorage userStorage;
-    private final GenreDbStorage genreStorage;
+    private final UserStorage userStorage; // работать через сервис
+    private final GenreDbStorage genreStorage; // нужно будет убрать и работать через сервис
+    private final GenreService genreService; // нужно будет убрать и работать через сервис
     private final MpaRatingDbStorage mpaRatingStorage;
+    private final MpaService mpaService;// работать через сервис
 
     public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage,
                        @Qualifier("userDbStorage") UserStorage userStorage,
                        GenreDbStorage genreStorage,
-                       MpaRatingDbStorage mpaRatingStorage) {
+                       GenreService genreService,
+                       MpaRatingDbStorage mpaRatingStorage,
+                       MpaService mpaService) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
         this.genreStorage = genreStorage;
+        this.genreService =genreService;
         this.mpaRatingStorage = mpaRatingStorage;
+        this.mpaService = mpaService;
     }
 
     public Film createFilm(Film film) {
@@ -40,7 +46,7 @@ public class FilmService {
             throw new ValidationException("Невозможно добавить фильм без данных");
         }
 
-        Long totalMpa = mpaRatingStorage.totalMpa();
+        Long totalMpa = mpaRatingStorage.getTotalMpa();
         if (totalMpa == 0 || film.getMpa().getId() > totalMpa) {
             throw new NotFoundException("Общее количество mpa_rating_id = " + totalMpa);
 
@@ -50,11 +56,12 @@ public class FilmService {
 //            if (genre.getId() > genreStorage.totalGenres()) {
 //                throw new NotFoundException("Общее количество жанров = " + genreStorage.totalGenres());
 //            }
-//        }
+//        } // адаптировать как mpaRating а вроде и не надо
 
         log.debug("Попытка добавить новый фильм: {}", film);
         log.info("Пользователь добавил фильм с названием {} с ID {}", film.getName(), film.getId());
-        return filmStorage.createFilm(film);
+        film = filmStorage.createFilm(film);
+        return film;
     }
 
     public Film updateFilm(Film newFilm) {
@@ -62,12 +69,44 @@ public class FilmService {
             log.warn("Отсутствует ID у объекта. Данные: {}", newFilm);
             throw new ValidationException("Id должен быть указан");
         }
-        Long totalMpa = mpaRatingStorage.totalMpa();
+
+        Long totalMpa = mpaRatingStorage.getTotalMpa();
         if (totalMpa == 0 || newFilm.getMpa().getId() > totalMpa) {
             throw new NotFoundException("Общее количество mpa_rating_id = " + totalMpa);
+        } // ещё добавить проверку на жанры
+
+        Film currentFilm = findFilmWithGenresAndMpaById(newFilm.getId());
+
+        if (newFilm.getName() != null && !currentFilm.getName().equals(newFilm.getName())) { //стоит ограничения на null в таблице
+            currentFilm.setName(newFilm.getName());
+            log.info("Пользователь хочет изменить имя фильма с ID {} на {}", newFilm.getId(), newFilm.getName());
+
         }
-        log.debug("Попытка внести изменения в данные фильма: {}", newFilm);
-        return filmStorage.updateFilm(newFilm);
+        if (newFilm.getMpa() != null && currentFilm.getMpa() != null
+                && !currentFilm.getMpa().getId().equals(newFilm.getMpa().getId())) {
+                currentFilm.getMpa().setId(newFilm.getMpa().getId());
+            log.info("Пользователь хочет изменить MPA рейтинг фильма с ID {} на {}", newFilm.getId(),
+                    newFilm.getMpa());
+        }
+
+        if (newFilm.getDescription() != null && !currentFilm.getDescription().equals(newFilm.getDescription())) {
+            currentFilm.setDescription(newFilm.getDescription());
+            log.info("Пользователь хочет изменить описание фильма с ID {} на {}", newFilm.getId(),
+                    newFilm.getDescription());
+        }
+        if (newFilm.getReleaseDate() != null && !currentFilm.getReleaseDate().equals(newFilm.getReleaseDate())) {
+            currentFilm.setReleaseDate(newFilm.getReleaseDate());
+            log.info("Пользователь хочет изменить дату выхода фильма с ID {} на {}", newFilm.getId(),
+                    newFilm.getReleaseDate());
+        }
+        if (newFilm.getDuration() != currentFilm.getDuration()) {
+            currentFilm.setDuration(newFilm.getDuration());
+            log.info("Пользователь хочет изменить продолжительность фильма с ID {} на {}", newFilm.getId(),
+                    newFilm.getDuration());
+        }
+    // ещё нужно будет учесть жанры
+        log.debug("Попытка сохранить изменения в данные фильма: {}", newFilm);
+        return filmStorage.updateFilm(currentFilm);
     }
 
     public Collection<Film> getAllFilms() {
@@ -77,7 +116,7 @@ public class FilmService {
         return films;
     }
 
-    public Film findFilmById(Long filmId) {
+    public Film findFilmWithGenresAndMpaById(Long filmId) {
         log.debug("Попытка найти фильм: filmId={}", filmId);
         if (filmId == null) {
             log.warn("Попытка найти фильм без указания ID фильма");
@@ -89,8 +128,12 @@ public class FilmService {
             log.warn("Фильм с ID {} не найден", filmId);
             throw new NotFoundException("Фильм c ID " + filmId + " не найден!");
         }
-        log.info("Пользователю отправлена информация о фильме: {}", filmOptional.get());
-        return filmOptional.get();
+        Film film = filmOptional.get();
+        film.setMpa(mpaService.findMpaRatingByFilmId(filmId));
+        Collection<Genre> genres = genreService.findGenresByFilmId(film.getId());
+        film.setGenres(new HashSet<>(genres));
+        log.info("Отправлена информация о фильме: {}", filmOptional.get());
+        return film;
     }
 
     public Film addLike(Long userId, Long filmId) {
@@ -151,26 +194,28 @@ public class FilmService {
         return popularFilms;
     }
 
-    public Genre createGenre(String name) {
-        return genreStorage.create(name);
-    }
+//    public Genre createGenre(String name) {
+//        return genreStorage.create(name);
+//    } // а оно надо? Кажется нет
 
-    public Collection<Genre> findAllGenre() {
-        return genreStorage.findAll();
-    }
+    //Если тесты проходят - удалить
+//    public Collection<Genre> findAllGenre() {
+//        return genreStorage.findAll();
+//    }
 
-    public Genre findGenreById(Long genreId) {
-        if (genreId == null) {
-            log.warn("Попытка найти жанр без указания ID жанра");
-            throw new ValidationException("ID жанра должен быть указан!");
-        }
-
-        Optional<Genre> genreOptional = genreStorage.findById(genreId);
-        if (genreOptional.isEmpty()) {
-            throw new NotFoundException("Жанр c ID " + genreId + " не найден!");
-        }
-        return genreOptional.get();
-    }
+    //если тесты проходят - удалить
+//    public Genre findGenreById(Long genreId) {
+//        if (genreId == null) {
+//            log.warn("Попытка найти жанр без указания ID жанра");
+//            throw new ValidationException("ID жанра должен быть указан!");
+//        }
+//
+//        Optional<Genre> genreOptional = genreStorage.findById(genreId);
+//        if (genreOptional.isEmpty()) {
+//            throw new NotFoundException("Жанр c ID " + genreId + " не найден!");
+//        }
+//        return genreOptional.get();
+//    }
 
     public Collection<MpaRating> findAllMpaRatings() {
         return mpaRatingStorage.findAll();

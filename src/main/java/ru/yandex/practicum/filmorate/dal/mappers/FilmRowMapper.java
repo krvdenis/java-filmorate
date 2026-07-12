@@ -17,9 +17,9 @@ public class FilmRowMapper implements RowMapper<Film> {
         film.setId(rs.getLong("id"));
         film.setName(rs.getString("name"));
 //        film.setMpa(rs.getLong("mpa_rating_id"));
-        MpaRating mpaRating = new MpaRating();
-        mpaRating.setId(rs.getLong("mpa_rating_id"));
-        film.setMpa(mpaRating);
+//        MpaRating mpaRating = new MpaRating(); // мб тоже убрать в свой rowMapper?
+//        mpaRating.setId(rs.getLong("mpa_rating_id"));
+//        film.setMpa(mpaRating);
 
         Date releaseDate = rs.getDate("release_date");
         film.setReleaseDate(releaseDate.toLocalDate());
