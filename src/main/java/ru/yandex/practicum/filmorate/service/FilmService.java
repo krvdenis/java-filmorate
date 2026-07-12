@@ -39,6 +39,19 @@ public class FilmService {
             log.warn("Попытка добавить фильм без данных");
             throw new ValidationException("Невозможно добавить фильм без данных");
         }
+
+        Long totalMpa = mpaRatingStorage.totalMpa();
+        if (totalMpa == 0 || film.getMpa().getId() > totalMpa) {
+            throw new NotFoundException("Общее количество mpa_rating_id = " + totalMpa);
+
+        }
+
+//        for (Genre genre : film.getGenres()) {
+//            if (genre.getId() > genreStorage.totalGenres()) {
+//                throw new NotFoundException("Общее количество жанров = " + genreStorage.totalGenres());
+//            }
+//        }
+
         log.debug("Попытка добавить новый фильм: {}", film);
         log.info("Пользователь добавил фильм с названием {} с ID {}", film.getName(), film.getId());
         return filmStorage.createFilm(film);
@@ -48,6 +61,10 @@ public class FilmService {
         if (newFilm.getId() == null) {
             log.warn("Отсутствует ID у объекта. Данные: {}", newFilm);
             throw new ValidationException("Id должен быть указан");
+        }
+        Long totalMpa = mpaRatingStorage.totalMpa();
+        if (totalMpa == 0 || newFilm.getMpa().getId() > totalMpa) {
+            throw new NotFoundException("Общее количество mpa_rating_id = " + totalMpa);
         }
         log.debug("Попытка внести изменения в данные фильма: {}", newFilm);
         return filmStorage.updateFilm(newFilm);
@@ -91,7 +108,7 @@ public class FilmService {
             log.warn("Пользователь с ID {} не найден", userId);
             throw new NotFoundException("Пользователь c ID " + userId + " не найден!");
         }
-        Optional<Film> filmOptional = filmStorage.findFilmById(userId);
+        Optional<Film> filmOptional = filmStorage.findFilmById(filmId);
         if (filmOptional.isEmpty()) {
             log.warn("Фильм с ID {} не найден", filmId);
             throw new NotFoundException("Фильм c ID " + filmId + " не найден!");
@@ -116,7 +133,7 @@ public class FilmService {
             log.warn("Пользователь с ID {} не найден", userId);
             throw new NotFoundException("Пользователь c ID " + userId + " не найден!");
         }
-        Optional<Film> filmOptional = filmStorage.findFilmById(userId);
+        Optional<Film> filmOptional = filmStorage.findFilmById(filmId);
         if (filmOptional.isEmpty()) {
             log.warn("Фильм с ID {} не найден", filmId);
             throw new NotFoundException("Фильм c ID " + filmId + " не найден!");
@@ -137,17 +154,17 @@ public class FilmService {
     public Genre createGenre(String name) {
         return genreStorage.create(name);
     }
-    
+
     public Collection<Genre> findAllGenre() {
         return genreStorage.findAll();
     }
-    
+
     public Genre findGenreById(Long genreId) {
         if (genreId == null) {
             log.warn("Попытка найти жанр без указания ID жанра");
             throw new ValidationException("ID жанра должен быть указан!");
         }
-        
+
         Optional<Genre> genreOptional = genreStorage.findById(genreId);
         if (genreOptional.isEmpty()) {
             throw new NotFoundException("Жанр c ID " + genreId + " не найден!");
@@ -171,5 +188,5 @@ public class FilmService {
         }
         return mpaRatingOptional.get();
     }
-    
+
 }

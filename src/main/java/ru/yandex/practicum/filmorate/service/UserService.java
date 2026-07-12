@@ -29,8 +29,9 @@ public class UserService {
             log.warn("Попытка добавить пользователя с пустыми данными");
             throw new ValidationException("Невозможно добавить пользователя с пустыми данными");
         }
-        log.info("Пользователь {} успешно зарегистрирован под ID {}", user.getLogin(), user.getId());
-        return UserMapper.mapToUserDto(userStorage.createUser(user));
+        UserDto userDto = UserMapper.mapToUserDto(userStorage.createUser(user));
+        log.info("Пользователь {} успешно зарегистрирован под ID {}", userDto.getLogin(), userDto.getId());
+        return userDto;
     }
 
     public User updateUser(User newUser) {

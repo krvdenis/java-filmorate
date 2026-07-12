@@ -75,14 +75,7 @@ public class FilmController {
     public Genre findGenreById(@PathVariable Long id) {
         return filmService.findGenreById(id);
     }
-    @GetMapping("/mpa")
-    public Collection<MpaRating> findMpaRatings() {
-        return filmService.findAllMpaRatings();
-    }
-    @GetMapping("/mpa/{id}")
-    public MpaRating findMpaRatingById(@PathVariable Long id) {
-        return filmService.findMpaRatingById(id);
-    }
+
 
 
 }

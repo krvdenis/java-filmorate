@@ -20,7 +20,7 @@ public class Film {
     private String name;
 
     private Set<Genre> genres = new HashSet<>();
-    private Long mpaRatingId;
+    private MpaRating mpa;
 
     @NotBefore1895Dec28(message = "Дата должна быть после 28 декабря 1895 года")
     private LocalDate releaseDate;

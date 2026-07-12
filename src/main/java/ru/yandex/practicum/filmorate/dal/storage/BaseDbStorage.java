@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.dal.storage;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -70,5 +71,14 @@ public class BaseDbStorage<T>{
     protected boolean delete(String query, Object... params) {
         int rowDeleted = jdbc.update(query, params);
         return rowDeleted > 0;
+    }
+
+    protected long count(String query, Object... params) {
+        try {
+            Long result = jdbc.queryForObject(query, Long.class, params);
+            return result != null ? result : 0L;
+        } catch (EmptyResultDataAccessException e) {
+            return 0L;
+        }
     }
 }

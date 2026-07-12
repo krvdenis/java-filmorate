@@ -70,7 +70,6 @@ public class UserDbStorage extends BaseDbStorage<User> implements UserStorage {
                     Date.valueOf(user.getBirthday())
             );
             user.setId(id);
-            log.info("Пользователь {} успешно зарегистрирован, добавлен в БД под ID {}", user.getLogin(), user.getId());
             return user;
         } catch (DuplicateKeyException e) {
             String errorMessage = e.getMessage().toLowerCase();

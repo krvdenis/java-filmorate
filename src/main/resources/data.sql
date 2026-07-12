@@ -10,24 +10,14 @@ UNION ALL
 SELECT 'NC-17' WHERE NOT EXISTS (SELECT 1 FROM mpa_rating WHERE name = 'NC-17');
 
 INSERT INTO genre (name)
-SELECT 'Drama' WHERE NOT EXISTS (SELECT 1 FROM genre WHERE name = 'Drama')
+SELECT 'Комедия' WHERE NOT EXISTS (SELECT 1 FROM genre WHERE name = 'Комедия')
 UNION ALL
-SELECT 'Comedy' WHERE NOT EXISTS (SELECT 1 FROM genre WHERE name = 'Comedy')
+SELECT 'Драма' WHERE NOT EXISTS (SELECT 1 FROM genre WHERE name = 'Драма')
 UNION ALL
-SELECT 'Adventure' WHERE NOT EXISTS (SELECT 1 FROM genre WHERE name = 'Adventure')
+SELECT 'Мультфильм' WHERE NOT EXISTS (SELECT 1 FROM genre WHERE name = 'Мультфильм')
 UNION ALL
-SELECT 'Sci‑Fi' WHERE NOT EXISTS (SELECT 1 FROM genre WHERE name = 'Sci‑Fi')
+SELECT 'Триллер' WHERE NOT EXISTS (SELECT 1 FROM genre WHERE name = 'Триллер')
 UNION ALL
-SELECT 'Fantasy' WHERE NOT EXISTS (SELECT 1 FROM genre WHERE name = 'Fantasy')
+SELECT 'Документальный' WHERE NOT EXISTS (SELECT 1 FROM genre WHERE name = 'Документальный')
 UNION ALL
-SELECT 'Horror' WHERE NOT EXISTS (SELECT 1 FROM genre WHERE name = 'Horror')
-UNION ALL
-SELECT 'Mystery' WHERE NOT EXISTS (SELECT 1 FROM genre WHERE name = 'Mystery')
-UNION ALL
-SELECT 'Action' WHERE NOT EXISTS (SELECT 1 FROM genre WHERE name = 'Action')
-UNION ALL
-SELECT 'Musical' WHERE NOT EXISTS (SELECT 1 FROM genre WHERE name = 'Musical')
-UNION ALL
-SELECT 'Western' WHERE NOT EXISTS (SELECT 1 FROM genre WHERE name = 'Western')
-UNION ALL
-SELECT 'Thriller' WHERE NOT EXISTS (SELECT 1 FROM genre WHERE name = 'Thriller');
+SELECT 'Боевик' WHERE NOT EXISTS (SELECT 1 FROM genre WHERE name = 'Боевик');
