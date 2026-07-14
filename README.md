@@ -25,20 +25,20 @@ WHERE id = ?;
 #### Добавить новый фильм
 
 ```sql
-INSERT INTO film (title, mpa_rating_id, release_date, description, duration)
+INSERT INTO film (name, mpa_rating_id, release_date, description, duration)
 VALUES (?, ?, ?, ?, ?);
 ```
 
 #### Обновить данные фильма
 
 ```sql
-UPDATE film SET title = ? WHERE id = ?;
+UPDATE film SET name = ? WHERE id = ?;
 ```
 
-#### Получить топ‑N популярных фильмов (по количеству лайков)
+#### Получить названия топ‑N популярных фильмов (по количеству лайков)
 
 ```sql
-SELECT f.title
+SELECT f.name
 FROM film AS f
 LEFT JOIN film_like AS fl ON f.id = fl.film_id
 GROUP BY f.id, f.title
@@ -47,12 +47,6 @@ LIMIT ?;
 ```
 
 ### 2. Работа с жанрами
-
-#### Добавить новый жанр
-
-```sql
-INSERT INTO genre (name) VALUES (?);
-```
 
 #### Привязать жанр к фильму
 
@@ -128,8 +122,6 @@ WHERE user_id = ? AND friend_user_id = ?;
 ```
 
 ### 6. Поиск общих друзей
-
-Вариант 1: через JOIN
 
 ```sql
 SELECT u.*
