@@ -1,6 +1,5 @@
-package ru.yandex.practicum.filmorate.model;
+package ru.yandex.practicum.filmorate.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PastOrPresent;
@@ -8,16 +7,9 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
 
-/**
- * User.
- */
 @Data
-public class User {
-    private Long id;
-
+public class NewUserRequest {
     @NotBlank
     @Pattern(
             regexp = "^[a-zA-Zа-яА-я0-9_@.-]{4,16}$",
@@ -33,7 +25,4 @@ public class User {
 
     @PastOrPresent
     private LocalDate birthday;
-
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private Set<Long> friends = new HashSet<>();
 }

@@ -1,7 +1,6 @@
-package ru.yandex.practicum.filmorate.dal.storage;
+package ru.yandex.practicum.filmorate.dal;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -14,12 +13,11 @@ import java.util.Collection;
 import java.util.Optional;
 
 @RequiredArgsConstructor
-public class BaseDbStorage<T>{
+public class BaseDbStorage<T> {
     protected final JdbcTemplate jdbc;
     protected final RowMapper<T> mapper;
 
     protected Collection<T> findMany(String query, Object... params) {
-
         return jdbc.query(query, mapper, params);
     }
 
@@ -80,5 +78,9 @@ public class BaseDbStorage<T>{
         } catch (EmptyResultDataAccessException e) {
             return 0L;
         }
+    }
+
+    public void clear(String query) {
+        jdbc.execute(query);
     }
 }

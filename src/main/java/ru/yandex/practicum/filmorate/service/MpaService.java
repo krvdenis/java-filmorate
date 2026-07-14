@@ -3,13 +3,16 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.dal.storage.MpaRatingDbStorage;
+import ru.yandex.practicum.filmorate.dal.MpaRatingDbStorage;
+import ru.yandex.practicum.filmorate.dto.MpaRatingDto;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.mapper.MpaRatingMapper;
 import ru.yandex.practicum.filmorate.model.MpaRating;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -17,26 +20,42 @@ import java.util.Optional;
 public class MpaService {
     private final MpaRatingDbStorage mpaStorage;
 
-    public Collection<MpaRating> findAllMpaRatings() {
-        return mpaStorage.findAll();
+    public Collection<MpaRatingDto> findAllMpaRatings() {
+        log.debug("Попытка получить список всех MPA");
+        Collection<MpaRatingDto> mpaRatingsDto = mpaStorage.findAll().stream()
+                .map(MpaRatingMapper::mapToMpaDto)
+                .collect(Collectors.toList());
+        log.info("Возвращается список из {} MPA", mpaRatingsDto.size());
+        return mpaRatingsDto;
     }
 
-    public MpaRating findMpaRatingById(Long id) {
-            if (id == null) {
-                log.warn("Попытка найти MPA рейтинг без указания ID MPA рейтинга");
-                throw new ValidationException("ID MPA рейтинга должен быть указан!");
-            }
+    public MpaRatingDto findMpaRatingById(Long id) {
+        log.debug("Попытка найти MPA: ID = {}", id);
+        if (id == null) {
+            log.warn("Попытка найти MPA рейтинг без указания ID MPA рейтинга");
+            throw new ValidationException("ID MPA рейтинга должен быть указан!");
+        }
 
-            Optional<MpaRating> mpaRatingOptional = mpaStorage.findById(id);
-            if (mpaRatingOptional.isEmpty()) {
-                throw new NotFoundException("MPA c ID " + id + " не найден!");
-            }
-            return mpaRatingOptional.get();
+        Optional<MpaRating> mpaRatingOptional = mpaStorage.findById(id);
+        if (mpaRatingOptional.isEmpty()) {
+            throw new NotFoundException("MPA c ID " + id + " не найден!");
+        }
+        log.info("Отправлена информация о MPA: {}", mpaRatingOptional.get());
+        return MpaRatingMapper.mapToMpaDto(mpaRatingOptional.get());
 
     }
 
-    public MpaRating findMpaRatingByFilmId(Long filmId) {
-       return mpaStorage.findMpaByFilmId(filmId).orElse(null);
+    public MpaRatingDto findMpaRatingByFilmId(Long filmId) {
+        log.debug("Попытка найти MPA по ID фильма: ID = {}", filmId);
+        MpaRating mpaRating = mpaStorage.findMpaByFilmId(filmId).orElse(null);
+        log.info("Отправлена информация о MPA: {} для фильма с ID: {}", mpaRating, filmId);
+        return MpaRatingMapper.mapToMpaDto(mpaRating);
     }
-    //добавить сюда count mpa и заменить дальше на этот метод
+
+    public Long findTotalNumberMpa() {
+        log.debug("Попытка найти общее количество MPA");
+        Long totalMpa = mpaStorage.getTotalNumberMpa();
+        log.info("Отправлена информация о количестве жанров: {}", totalMpa);
+        return totalMpa;
+    }
 }

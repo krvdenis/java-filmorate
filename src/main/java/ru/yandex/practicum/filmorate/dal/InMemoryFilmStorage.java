@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.dal.storage;
+package ru.yandex.practicum.filmorate.dal;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -33,16 +33,19 @@ public class InMemoryFilmStorage implements FilmStorage {
                 log.info("Пользователь изменил имя фильма с ID {} на {}", newFilm.getId(), newFilm.getName());
 
             }
+
             if (newFilm.getDescription() != null && !oldFilm.getDescription().equals(newFilm.getDescription())) {
                 oldFilm.setDescription(newFilm.getDescription());
                 log.info("Пользователь изменил описание фильма с ID {} на {}", newFilm.getId(),
                         newFilm.getDescription());
             }
+
             if (newFilm.getReleaseDate() != null && !oldFilm.getReleaseDate().equals(newFilm.getReleaseDate())) {
                 oldFilm.setReleaseDate(newFilm.getReleaseDate());
                 log.info("Пользователь изменил дату выхода фильма с ID {} на {}", newFilm.getId(),
                         newFilm.getReleaseDate());
             }
+
             if (oldFilm.getDuration() != newFilm.getDuration()) {
                 oldFilm.setDuration(newFilm.getDuration());
                 log.info("Пользователь изменил продолжительность фильма с ID {} на {}", newFilm.getId(),
@@ -76,6 +79,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     public void deleteLike(Film film, Long userId) {
         Set<Long> likes = film.getLikes();
         boolean removed = likes.remove(userId);
+
         if (removed) {
             log.info("Лайк удалён: пользователь {} убрал лайк у фильма {}", userId, film.getId());
         } else {
@@ -85,7 +89,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Collection<Film> findMostPopularFilmsByLikes(int count) {
+    public Collection<Film> getMostPopularFilmsByLikes(int count) {
         return films.values()
                 .stream()
                 .sorted(filmComparator)

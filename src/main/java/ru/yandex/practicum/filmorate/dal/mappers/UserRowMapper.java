@@ -9,7 +9,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 @Component
-public class UserRowMapper implements RowMapper <User> {
+public class UserRowMapper implements RowMapper<User> {
+
     @Override
     public User mapRow(ResultSet rs, int rowNum) throws SQLException {
         User user = new User();
@@ -18,8 +19,12 @@ public class UserRowMapper implements RowMapper <User> {
         user.setName(rs.getString("name"));
         user.setEmail(rs.getString("email"));
 
-        Date birthday = rs.getDate("birthday");
-        user.setBirthday(birthday.toLocalDate());
+        Date birthday = null;
+        Date date = rs.getDate("birthday");
+        if (date != null) {
+            birthday = rs.getDate("birthday");
+            user.setBirthday(birthday.toLocalDate());
+        }
         return user;
     }
 }

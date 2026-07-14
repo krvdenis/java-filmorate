@@ -1,11 +1,12 @@
-package ru.yandex.practicum.filmorate.model;
+package ru.yandex.practicum.filmorate.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import ru.yandex.practicum.filmorate.annotation.NotBefore1895Dec28;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.MpaRating;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -15,9 +16,7 @@ import java.util.Set;
  * Film.
  */
 @Data
-public class Film {
-    private Long id;
-
+public class NewFilmRequest {
     @NotBlank
     private String name;
 
@@ -32,11 +31,4 @@ public class Film {
 
     @Positive
     private int duration;
-
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private Set<Long> likes = new HashSet<>();
-
-    public int getTotalLikes() { //нужно будет заменить из-за того, что убираю likes
-        return likes.size();
-    }
 }

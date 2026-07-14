@@ -1,19 +1,13 @@
-package ru.yandex.practicum.filmorate.dal.storage;
+package ru.yandex.practicum.filmorate.dal;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.DuplicateDataException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Component("inMemoryUserStorage")
 @Slf4j
@@ -102,7 +96,6 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public Optional<User> findUserById(Long userId) {
-
         if (!users.containsKey(userId)) {
             log.warn("Запрашиваемый пользователь с ID {} не найден", userId);
             throw new NotFoundException("Пользователь с ID " + userId + " не найден!");
@@ -125,6 +118,7 @@ public class InMemoryUserStorage implements UserStorage {
         User user = users.get(userId);
         Set<Long> userFriends = user.getFriends();
         userFriends.add(newFriendId);
+
         User newFriend = users.get(newFriendId);
         newFriend.getFriends().add(userId);
         return user;
@@ -145,6 +139,7 @@ public class InMemoryUserStorage implements UserStorage {
         User user = users.get(userId);
         Set<Long> friends = user.getFriends();
         friends.remove(friendId);
+
         User exFriend = users.get(friendId);
         exFriend.getFriends().remove(userId);
     }
