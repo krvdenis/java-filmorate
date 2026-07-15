@@ -158,6 +158,11 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
+    public Map<Long, Collection<Long>> getUserFriendsMap(Set<Long> allUserIds) {
+        return Map.of();
+    }
+
+    @Override
     public Collection<User> getCommonFriends(Long userId, Long otherId) {
         if (!users.containsKey(userId)) {
             log.warn("Пользователь с ID {} не найден", userId);

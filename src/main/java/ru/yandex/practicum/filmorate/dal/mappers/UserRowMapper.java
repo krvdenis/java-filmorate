@@ -19,7 +19,7 @@ public class UserRowMapper implements RowMapper<User> {
         user.setName(rs.getString("name"));
         user.setEmail(rs.getString("email"));
 
-        Date birthday = null;
+        Date birthday;
         Date date = rs.getDate("birthday");
         if (date != null) {
             birthday = rs.getDate("birthday");

@@ -13,8 +13,11 @@ import ru.yandex.practicum.filmorate.dal.UserStorage;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -55,13 +58,30 @@ public class UserService {
     public Collection<UserDto> findAllUsers() {
         log.debug("Попытка получить список всех пользователей");
 
-        Collection<UserDto> users = userStorage.findAllUsers().stream()
-                .peek(user -> user.setFriends(new HashSet<>(getFriendsId(user.getId()))))
-                .map(UserMapper::mapToUserDto)
+        Collection<User> users = userStorage.findAllUsers();
+
+        if (users.isEmpty()) {
+            log.info("Список пользователей пуст");
+            return Collections.emptyList();
+        }
+
+        Set<Long> allUserIds = users.stream()
+                .map(User::getId)
+                .collect(Collectors.toSet());
+
+        log.debug("Собрано {} уникальных ID пользователей для запроса друзей", allUserIds.size());
+
+        Map<Long, Collection<Long>> userToFriendsMap = userStorage.getUserFriendsMap(allUserIds);
+        Collection<UserDto> usersWithFriends = users.stream()
+                .map(user -> {
+                    Collection<Long> friendsId = userToFriendsMap.getOrDefault(user.getId(), Collections.emptyList());
+                    user.setFriends(new HashSet<>(friendsId));
+                    return UserMapper.mapToUserDto(user);
+                })
                 .collect(Collectors.toList());
 
-        log.info("Пользователю отправлен список из {} пользователей", users.size());
-        return users;
+        log.info("Отправлен список из {} пользователей с друзьями", usersWithFriends.size());
+        return usersWithFriends;
     }
 
     public UserDto findUserById(Long userId) {
@@ -136,18 +156,35 @@ public class UserService {
 
     public Collection<UserDto> getCommonFriends(Long userId, Long otherId) {
         log.debug("Попытка запроса списка общих друзей: userId={}, otherId={}", userId, otherId);
+
         if (otherId == null || userId == null) {
             log.warn("Попытка запроса списка общих друзей без указания ID одного или обоих пользователей");
             throw new ValidationException("ID пользователей должен быть указан!");
         }
 
-        Collection<UserDto> commonFriends = userStorage.getCommonFriends(userId, otherId).stream()
-                .peek(user -> user.setFriends(new HashSet<>(getFriendsId(user.getId()))))
-                .map(UserMapper::mapToUserDto)
-                .collect(Collectors.toList());
-        log.info("Отправлен список общих друзей размером: {}", commonFriends.size());
+        Collection<User> commonFriends = userStorage.getCommonFriends(userId, otherId);
 
-        return commonFriends;
+        if (commonFriends.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        Set<Long> commonFriendIds = commonFriends.stream()
+                .map(User::getId)
+                .collect(Collectors.toSet());
+
+        log.debug("Найдено {} общих друзей с ID: {}", commonFriendIds.size(), commonFriendIds);
+
+        Map<Long, Collection<Long>> userToFriendsMap = userStorage.getUserFriendsMap(commonFriendIds);
+        Collection<UserDto> commonFriendsWithFriends = commonFriends.stream()
+                .map(user -> {
+                    Collection<Long> friendsId = userToFriendsMap.getOrDefault(user.getId(), Collections.emptyList());
+                    user.setFriends(new HashSet<>(friendsId));
+                    return UserMapper.mapToUserDto(user);
+                })
+                .collect(Collectors.toList());
+
+        log.info("Отправлен список общих друзей размером: {}", commonFriendsWithFriends.size());
+        return commonFriendsWithFriends;
     }
 
     private Collection<Long> getFriendsId(Long userId) {

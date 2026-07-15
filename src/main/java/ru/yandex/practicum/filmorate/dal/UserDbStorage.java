@@ -12,7 +12,12 @@ import ru.yandex.practicum.filmorate.model.User;
 
 import java.sql.Date;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 @Component("userDbStorage")
 @Slf4j
@@ -73,6 +78,11 @@ public class UserDbStorage extends BaseDbStorage<User> implements UserStorage {
                     FROM user_friend uf2
                     WHERE uf2.user_id = ?
                 )
+            """;
+    private static final String FIND_ALL_FRIENDS_FOR_USERS_QUERY = """
+                SELECT uf.user_id, uf.friend_user_id
+                FROM user_friend AS uf
+                WHERE uf.user_id IN (?)
             """;
 
     private static final String DELETE_USERS_QUERY = "DELETE FROM \"user\"";
@@ -226,6 +236,31 @@ public class UserDbStorage extends BaseDbStorage<User> implements UserStorage {
     @Override
     public Collection<User> getCommonFriends(Long userId, Long otherId) {
         return findMany(FIND_COMMON_FRIENDS_QUERY, userId, otherId);
+    }
+
+    public Map<Long, Collection<Long>> getUserFriendsMap(Set<Long> userIds) {
+        log.debug("Попытка получить Map друзей для {} пользователей", userIds.size());
+
+        if (userIds.isEmpty()) {
+            return new HashMap<>();
+        }
+
+        String targetUserIds = String.join(",", userIds.stream().map(String::valueOf).toArray(String[]::new));
+        String sql = FIND_ALL_FRIENDS_FOR_USERS_QUERY.replace("?", targetUserIds);
+
+        List<Map<String, Object>> rows = jdbc.queryForList(sql);
+        Map<Long, Collection<Long>> userToFriendsMap = new HashMap<>();
+
+        for (Map<String, Object> row : rows) {
+            Long userId = ((Number) row.get("user_id")).longValue();
+            Long friendId = ((Number) row.get("friend_user_id")).longValue();
+
+            Collection<Long> friends = userToFriendsMap.computeIfAbsent(userId, k -> new HashSet<>());
+            friends.add(friendId);
+        }
+
+        log.info("Получено связей друзей: {}", rows.size());
+        return userToFriendsMap;
     }
 
     public void clear() {

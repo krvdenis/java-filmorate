@@ -11,8 +11,10 @@ import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component("filmDbStorage")
 @Slf4j
@@ -130,7 +132,7 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
                 film.getDescription(),
                 film.getDuration());
         film.setId(id);
-        addGenresToFilm(film.getId(), film.getGenres());
+        insertGenresToFilm(film.getId(), film.getGenres(), INSERT_FILM_GENRE_QUERY);
         return film;
     }
 
@@ -140,7 +142,7 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
 
         update(UPDATE_FILM__QUERY, film.getName(), mpaId, film.getReleaseDate(), film.getDescription(),
                 film.getDuration(), film.getId());
-        updateGenresToFilm(film.getId(), film.getGenres());
+        insertGenresToFilm(film.getId(), film.getGenres(), UPDATE_FILM_GENRE_QUERY);
         mpaRatingDbStorage.findMpaByFilmId(film.getId()).ifPresent(film::setMpa);
         Collection<Genre> genres = genreDbStorage.findGenresByFilmId(film.getId());
         film.setGenres(new HashSet<>(genres));
@@ -185,37 +187,40 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
         return findMany(FIND_MOST_POPULAR_FILMS_QUERY, count);
     }
 
-    private void addGenresToFilm(Long filmId, Set<Genre> genres) {
-        if (genres == null || genres.isEmpty()) {
-            log.debug("Жанры для фильма {} не указаны", filmId);
-            return;
-        }
-        for (Genre genre : genres) {
-            Optional<Genre> genreOptional = genreDbStorage.findById(genre.getId());
-            if (genreOptional.isEmpty()) {
-                log.error("Жанр не найден. ID: {}", genre.getId());
-                continue;
-            }
-            insertWithoutGeneratedKey(INSERT_FILM_GENRE_QUERY, filmId, genre.getId());
-        }
-    }
-
-    private void updateGenresToFilm(Long filmId, Set<Genre> genres) {
-        if (genres == null || genres.isEmpty()) {
-            log.debug("Жанры для фильма {} не указаны", filmId);
-            return;
-        }
-        for (Genre genre : genres) {
-            Optional<Genre> genreOptional = genreDbStorage.findById(genre.getId());
-            if (genreOptional.isEmpty()) {
-                log.error("Жанр не найден. ID: {}", genre.getId());
-                continue;
-            }
-            insertWithoutGeneratedKey(UPDATE_FILM_GENRE_QUERY, filmId, genre.getId());
-        }
-    }
-
     public void clear() {
         clear(DELETE_FILM_QUERY);
+    }
+
+    private void insertGenresToFilm(Long filmId, Set<Genre> genres, String query) {
+        if (genres == null || genres.isEmpty()) {
+            log.debug("Жанры для фильма {} не указаны", filmId);
+            return;
+        }
+
+        Set<Long> genreIds = genres.stream()
+                .map(Genre::getId)
+                .collect(Collectors.toSet());
+
+        Collection<Genre> existingGenres = genreDbStorage.findGenresByIds(genreIds);
+        Set<Long> validGenreIds = existingGenres.stream()
+                .map(Genre::getId)
+                .collect(Collectors.toSet());
+
+        Set<Genre> validGenres = genres.stream()
+                .filter(genre -> validGenreIds.contains(genre.getId()))
+                .collect(Collectors.toSet());
+
+        if (validGenres.isEmpty()) {
+            log.warn("Ни один из указанных жанров не найден в БД для фильма {}", filmId);
+            return;
+        }
+
+        List<Object[]> batchArgs = validGenres.stream()
+                .map(genre -> new Object[]{filmId, genre.getId()})
+                .collect(Collectors.toList());
+
+        jdbc.batchUpdate(query, batchArgs);
+
+        log.info("Для фильма {} добавлено {} связей с жанрами", filmId, batchArgs.size());
     }
 }
