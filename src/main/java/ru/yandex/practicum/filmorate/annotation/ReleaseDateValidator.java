@@ -6,6 +6,7 @@ import jakarta.validation.ConstraintValidatorContext;
 import java.time.LocalDate;
 
 public class ReleaseDateValidator implements ConstraintValidator<NotBefore1895Dec28, LocalDate> {
+
     @Override
     public void initialize(NotBefore1895Dec28 constraintAnnotation) {
 

@@ -14,7 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class FilmControllerTest {
+public class FilmControllerTests {
     @Autowired
     private MockMvc mockMvc;
 
@@ -43,7 +43,7 @@ public class FilmControllerTest {
         mockMvc.perform(post("/films")
                         .content(validFilmJson)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
     }
 
     @Test
@@ -91,7 +91,7 @@ public class FilmControllerTest {
         mockMvc.perform(post("/films")
                         .content(filmJsonWithDescription200Chars)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
     }
 
     @Test
@@ -124,7 +124,7 @@ public class FilmControllerTest {
         mockMvc.perform(post("/films")
                         .content(validFilmJson)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
     }
 
     @Test
@@ -154,7 +154,7 @@ public class FilmControllerTest {
         mockMvc.perform(post("/films")
                         .content(filmJsonWithOneDuration)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
     }
 
     @Test
