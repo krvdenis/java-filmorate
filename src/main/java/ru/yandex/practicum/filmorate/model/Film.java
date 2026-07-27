@@ -33,7 +33,7 @@ public class Film {
     @Positive
     private int duration;
 
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Set<Long> likes = new HashSet<>();
 
     public int getTotalLikes() { //нужно будет заменить из-за того, что убираю likes

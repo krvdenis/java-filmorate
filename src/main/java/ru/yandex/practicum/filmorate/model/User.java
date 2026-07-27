@@ -34,6 +34,6 @@ public class User {
     @PastOrPresent
     private LocalDate birthday;
 
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Set<Long> friends = new HashSet<>();
 }

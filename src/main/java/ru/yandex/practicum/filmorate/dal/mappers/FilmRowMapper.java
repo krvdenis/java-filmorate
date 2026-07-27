@@ -28,15 +28,6 @@ public class FilmRowMapper implements RowMapper<Film> {
         film.setDescription(rs.getString("description"));
         film.setDuration(rs.getInt("duration"));
 
-        String userIdsStr = rs.getString("users_id");
-        if (userIdsStr != null && !userIdsStr.isEmpty()) {
-            String[] usersId = userIdsStr.split(",");
-            for (String userIdStr : usersId) {
-                Long userId = Long.parseLong(userIdStr.trim());
-                film.getLikes().add(userId);
-            }
-        }
-
         Long mpaId = rs.getLong("mpa_rating_id");
         if (mpaId != 0) {
             MpaRating mpaRating = new MpaRating();
@@ -45,6 +36,15 @@ public class FilmRowMapper implements RowMapper<Film> {
             film.setMpa(mpaRating);
         } else {
             film.setMpa(null);
+        }
+
+        String userIdsStr = rs.getString("users_id");
+        if (userIdsStr != null && !userIdsStr.isEmpty()) {
+            String[] usersId = userIdsStr.split(",");
+            for (String userIdStr : usersId) {
+                Long userId = Long.parseLong(userIdStr.trim());
+                film.getLikes().add(userId);
+            }
         }
 
         String genreNamesStr = rs.getString("genres_name");

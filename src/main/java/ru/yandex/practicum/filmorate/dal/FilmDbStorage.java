@@ -144,6 +144,7 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
                 film.getDuration(), film.getId());
         insertGenresToFilm(film.getId(), film.getGenres(), UPDATE_FILM_GENRE_QUERY);
         mpaRatingDbStorage.findMpaByFilmId(film.getId()).ifPresent(film::setMpa);
+
         Collection<Genre> genres = genreDbStorage.findGenresByFilmId(film.getId());
         film.setGenres(new HashSet<>(genres));
         return film;
