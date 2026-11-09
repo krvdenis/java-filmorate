@@ -1,139 +1,35 @@
-# java-filmorate
+# Filmorate — Бэкенд-сервис для оценки фильмов и рекомендаций
 
-Template repository for Filmorate project.
+Социальная бэкенд-платформа на базе Spring Boot для рецензирования медиа-контента, ведения списков друзей и формирования рейтингов.
+
+## 🚀 Ключевые архитектурные и технические фичи
+
+*   **Миграция на СУБД (Spring JDBC):** Перевод приложения из оперативной памяти (`In-Memory`) на встроенную реляционную базу данных H2 с помощью `JdbcTemplate` с сохранением обратной совместимости REST API.
+*   **Нормализация схемы данных:** Проектирование реляционной структуры со сложными связями (отношения «дружбы») и отношений «многие-ко-многим» (лайки к фильмам, жанры).
+
+## 🛠️ Технологический стек
+
+*   **Язык и фреймворки:** Java 21, Spring Boot 3.x (Spring Web, Spring JDBC).
+*   **Базы данных:** H2 Database.
+*   **Инструменты:** Maven, Lombok.
+
+## 🏗️ Схема базы данных (ER-Diagram)
 ![Screenshot](https://github.com/krvdenis/java-filmorate/blob/add-database/ER-filmorate.png)
 
-# SQL‑запросы для работы с базой данных
+## 💻 Локальный запуск
 
-### 1. Работа с фильмами
+Проект полностью автономен и работает на базе встроенной СУБД H2, поэтому предварительная установка сторонних баз данных не требуется.
 
-#### Получить список всех фильмов
-
-```sql
-SELECT *
-FROM film;
+1. Клонируйте репозиторий через SSH:
+```bash
+git clone git@github.com:krvdenis/java-filmorate.git
+cd java-filmorate
 ```
 
-#### Найти фильм по ID
-
-```sql
-SELECT *
-FROM film
-WHERE id = ?;
+2. Соберите проект и запустите приложение с помощью Maven:
+```bash
+mvn clean package
+java -jar target/*.jar
 ```
 
-#### Добавить новый фильм
-
-```sql
-INSERT INTO film (name, mpa_rating_id, release_date, description, duration)
-VALUES (?, ?, ?, ?, ?);
-```
-
-#### Обновить данные фильма
-
-```sql
-UPDATE film SET name = ? WHERE id = ?;
-```
-
-#### Получить названия топ‑N популярных фильмов (по количеству лайков)
-
-```sql
-SELECT f.name
-FROM film AS f
-LEFT JOIN film_like AS fl ON f.id = fl.film_id
-GROUP BY f.id, f.title
-ORDER BY COUNT(fl.user_id) DESC
-LIMIT ?;
-```
-
-### 2. Работа с жанрами
-
-#### Привязать жанр к фильму
-
-```sql
-INSERT INTO film_genre (film_id, genre_id) VALUES (?, ?);
-```
-
-### 3. Работа с лайками
-
-#### Поставить лайк фильму
-
-```sql
-INSERT INTO film_like (film_id, user_id) VALUES (?, ?);
- ```
-
-#### Удалить лайк
-
-```sql
-DELETE FROM film_like WHERE film_id = ? AND user_id = ?;
-```
-
-### 4. Работа с пользователями
-
-#### Получить список всех пользователей
-
-```sql
-SELECT * FROM \"user\";
- ```
-
-#### Найти пользователя по ID
-
-```sql
-SELECT * FROM \"user\" WHERE id = ?;
- ```
-
-#### Добавить нового пользователя
-
-```sql
-INSERT INTO \"user\" (login, name, email, birthday) VALUES (?, ?, ?, ?);
- ```
-
-#### Обновить данные пользователя
-
-```sql
-UPDATE \"user\" SET login = ?, name = ?, SET email = ?, SET birthday = ? WHERE id = ?
-```
-
-### 5. Работа с дружбой
-
-#### Добавить пользователя в друзья
-
-```sql
-INSERT INTO user_friend (user_id, friend_user_id) VALUES (?, ?);
- ```
-
-#### Получить список всех друзей пользователя
-
-*По умолчанию возвращает только тех, кого пользователь добавил в друзья. (односторонняя дружба)*
-*Одна запись в user_friend — односторонняя дружба, две встречные записи — подтверждённая дружба*
-
-```sql
-SELECT u.*
-FROM \"user\" AS u
-JOIN user_friend AS ON u.id = uf.friend_user_id
-WHERE uf.user_id = ?;
-```
-
-#### Удалить пользователя из друзей
-
-```sql
-DELETE FROM user_friend
-WHERE user_id = ? AND friend_user_id = ?;
-```
-
-### 6. Поиск общих друзей
-
-```sql
-SELECT u.*
-FROM "user" u
-WHERE u.id IN (
-    SELECT uf1.friend_user_id
-    FROM user_friend uf1
-    WHERE uf1.user_id = ?
-)
-AND u.id IN (
-    SELECT uf2.friend_user_id
-    FROM user_friend uf2
-    WHERE uf2.user_id = ?
-);
-```
+После успешного старта сервис будет доступен по адресу: `http://localhost:8080`
